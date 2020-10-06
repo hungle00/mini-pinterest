@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, render_template, flash
+from flask import Flask, redirect, url_for, render_template, flash, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from oauth import OAuthSignIn
@@ -39,6 +39,42 @@ def index():
     images = list(reversed(Pin.query.all()))
     return render_template('grid.html',
             title='All images', app_name=app_name, images=images, user=nickname)
+
+
+@app.route('/myimages')
+@login_required
+def my_images():
+    nickname = current_user.nickname
+    images = list(reversed(Pin.query.filter_by(nickname=nickname).all()))
+    return render_template('grid.html',
+            title='My images', app_name=app_name, images=images, user=nickname)
+
+
+@app.route('/newimage', methods=['POST'])
+@login_required
+def post_image():
+    #nickname = current_user.nickname
+    image_url = request.form.get('image_url')
+    image_text = request.form.get('image_text')
+
+    if current_user and image_url and image_text:
+        new_pin = Pin(author=current_user, text=image_text, image=image_url)
+        db.session.add(new_pin)
+        db.session.commit()
+
+    return redirect(request.referrer or url_for('index'))
+
+
+@app.route('/deleteimage/<id>')
+@login_required
+def delete_image(id):
+    pin = Pin.query.get(id)
+
+    if pin.author == current_user:
+        db.session.delete(pin)
+        db.session.commit()
+
+    return redirect(request.referrer or url_for('index'))
 
 
 @app.route('/login')

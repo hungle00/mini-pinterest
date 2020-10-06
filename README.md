@@ -1,2 +1,3 @@
-flask-oauth-example
-===================
+# Mini Pinterest 
+
+### Registration with OAuth
