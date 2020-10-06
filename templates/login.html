@@ -1,13 +1,14 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-  <div class="text-center">
-    <br />
-    <a class="btn btn-default" href='/auth/twitter'>
-      <img src="/static/img/twitter_32px.png" />
-      &nbsp;&nbsp;
-      Sign in with Twitter
-    </a>
+<div class="text-center">
+  <h1>OAuth Demo</h1>
+  {% for message in get_flashed_messages() %}
+      <p><b>Error</b>: {{ message }}</p>
+  {% endfor %}
+  <h2>I don't know you!</h2>
+  <p><a href="{{ url_for('oauth_authorize', provider='google') }}">Login with Google</a></p>
+  <p><a href="{{ url_for('oauth_authorize', provider='twitter') }}">Login with Twitter</a></p>
 </div>
 
 {% endblock %}

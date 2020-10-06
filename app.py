@@ -1,7 +1,6 @@
 from flask import Flask, redirect, url_for, render_template, flash
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, logout_user,\
-    current_user
+from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from oauth import OAuthSignIn
 
 from models import db, User, Pin
@@ -23,23 +22,8 @@ app.config['OAUTH_CREDENTIALS'] = {
 
 db.init_app(app)
 db.create_all(app=app)
-#db = SQLAlchemy(app)
 lm = LoginManager(app)
-lm.login_view = 'index'
-
-
-""" class User(UserMixin, db.Model):
-    __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    social_id = db.Column(db.String(64), nullable=False, unique=True)
-    nickname = db.Column(db.String(64), nullable=False)
-    email = db.Column(db.String(64), nullable=True) """
-
-
-""" @app.before_first_request
-def create_tables():
-    db.create_all() """
-
+lm.login_view = 'login'
 
 @lm.user_loader
 def load_user(id):
@@ -48,8 +32,21 @@ def load_user(id):
 app_name = 'Pinterest Clone'
 
 @app.route('/')
+@app.route('/index')
+@login_required
 def index():
-    return render_template('index.html', app_name = app_name, title='Login')
+    nickname = current_user.nickname
+    images = list(reversed(Pin.query.all()))
+    return render_template('grid.html',
+            title='All images', app_name=app_name, images=images, user=nickname)
+
+
+@app.route('/login')
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+
+    return render_template('login.html', app_name = app_name, title='Login')
 
 
 @app.route('/logout')
@@ -85,5 +82,4 @@ def oauth_callback(provider):
 
 
 if __name__ == '__main__':
-    #db.create_all()
     app.run(debug=True)

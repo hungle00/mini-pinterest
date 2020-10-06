@@ -10,6 +10,10 @@ class User(UserMixin, db.Model):
     social_id = db.Column(db.String(64), nullable=False, unique=True)
     nickname = db.Column(db.String(64), nullable=False)
     email = db.Column(db.String(64), nullable=True)
+    pins = db.relationship('Pin', backref='author', lazy='dynamic')
+
+    def __repr__(self):
+        return '<User {}>'.format(self.nickname)
 
 
 class Pin(db.Model):
@@ -18,3 +22,6 @@ class Pin(db.Model):
     nickname = db.Column(db.String(80), db.ForeignKey('users.nickname'))
     text = db.Column(db.String(140))
     image = db.Column(db.String(140))
+
+    def __repr__(self):
+        return '<Pin {}>'.format(self.text)
