@@ -4,45 +4,52 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user,\
     current_user
 from oauth import OAuthSignIn
 
+from models import db, User, Pin
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'top secret!'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
 app.config['OAUTH_CREDENTIALS'] = {
     'google': {
-        'id': 'df32b1b8d9c4dd730a0c',
-        'secret': '5f90f651009036ccc49a2b93a2e445e7f4b67ee9'
-    },
-    'twitter': {
         'id':'9699437797-n0v534ssokcsv64u4jk9bbn2tounv57s.apps.googleusercontent.com',
         'secret':'9cP5SMe-QPbXarq_rlJwHU9-'
+    },
+    'twitter': {
+        'id':'28whRejVnGyRbLOYrgXveWgJ1',
+        'secret':'WMghu6fU7Z7ApNhdW38bISklppHSwwBduxGtNPjmBUj5iWJeEF'
     }
 }
 
-db = SQLAlchemy(app)
+db.init_app(app)
+db.create_all(app=app)
+#db = SQLAlchemy(app)
 lm = LoginManager(app)
 lm.login_view = 'index'
 
 
-class User(UserMixin, db.Model):
+""" class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     social_id = db.Column(db.String(64), nullable=False, unique=True)
     nickname = db.Column(db.String(64), nullable=False)
-    email = db.Column(db.String(64), nullable=True)
+    email = db.Column(db.String(64), nullable=True) """
 
-@app.before_first_request
+
+""" @app.before_first_request
 def create_tables():
-    db.create_all()
+    db.create_all() """
+
 
 @lm.user_loader
 def load_user(id):
     return User.query.get(int(id))
 
+app_name = 'Pinterest Clone'
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', app_name = app_name, title='Login')
 
 
 @app.route('/logout')
@@ -78,5 +85,5 @@ def oauth_callback(provider):
 
 
 if __name__ == '__main__':
-    db.create_all()
+    #db.create_all()
     app.run(debug=True)
